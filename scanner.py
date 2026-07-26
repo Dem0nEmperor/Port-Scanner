@@ -12,7 +12,7 @@ class IPScan:
         self.portRange1 = portRange1
         self.portRange2 = portRange2
         self.progress = self.portRange1
-        self.executor = ThreadPoolExecutor(max_workers=400)
+        self.executor = ThreadPoolExecutor(max_workers=800)
         self.threads = []
         self.stopped = False
 
@@ -80,7 +80,7 @@ class IPScan:
         if self.stopped:
             return
         try:
-            with socket.create_connection((self.host, port), timeout=1.0) as sock:
+            with socket.create_connection((self.host, port), timeout=0.5) as sock:
 
                 active_result = self.active_check(sock)
                 if active_result != "None":
@@ -101,7 +101,7 @@ class IPScan:
                     pass
         except Exception as e:
             return
-        with socket.create_connection((self.host, port), timeout=1.0) as sock:
+        with socket.create_connection((self.host, port), timeout=0.5) as sock:
             if self.dns_check(sock):
                 return [port, "DNS"]
             else:
