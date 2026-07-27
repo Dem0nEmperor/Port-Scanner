@@ -89,6 +89,21 @@ def start_button():
     global running
 
     if ui.lineEdit.text() != "" and ui.lineEdit_2.text() != "" and ui.lineEdit_3.text() != "":
+
+        for s in ui.lineEdit_2.text():
+            if s not in "0123456789":
+                messagebox.showerror("", "Error")
+                return
+
+        for s in ui.lineEdit_3.text():
+            if s not in "0123456789":
+                messagebox.showerror("", "Error")
+                return
+
+        if int(ui.lineEdit_2.text()) >= int(ui.lineEdit_3.text()):
+            messagebox.showerror("", "Error")
+            return
+
         running = True
 
         ui.pushButton.setText("Stop")
@@ -111,6 +126,8 @@ def start_button():
 
         tz = threading.Thread(target=scan_handler)
         tz.start()
+    else:
+        messagebox.showerror("", "Error")
 
 def main_button():
     if running:
