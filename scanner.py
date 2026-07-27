@@ -100,13 +100,9 @@ class IPScan:
                     if response.startswith(b"HTTP"):
                         return [port, "HTTP"]
 
-                   # return [port, "Unknown"]
-
                 except socket.timeout:
                     pass
         except Exception as e:
-            if port == 443:
-                print("Ошибка:" + str(e))
             return
 
         try:

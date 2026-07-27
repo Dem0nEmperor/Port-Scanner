@@ -10,7 +10,7 @@
 
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
+    QSize, QTime, QUrl, Slot, Qt)
 from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
@@ -174,6 +174,14 @@ class Ui_Form(object):
         self.pushButton_2.setText(QCoreApplication.translate("Form", u"Stop", None))
         self.label_5.setText(QCoreApplication.translate("Form", u"Sec: 0.0", None))
         self.pushButton_3.setText(QCoreApplication.translate("Form", u"Export", None))
+    
+    @Slot(int)
+    def set_color(self, id):
+        print("ID: " + str(id))
+        if id == 1:
+            self.setred()
+        else:
+            self.setgreen()
 
     def setgreen(self):
         self.pushButton.setStyleSheet(u"QPushButton {\n"
@@ -199,7 +207,7 @@ class Ui_Form(object):
                                     "}\n"
                                     "\n"
                                     "QPushButton:hover {\n"
-                                    "	background-color: rgb(255, 196, 206);\n"
+                                   "	background-color: rgb(255, 196, 206);\n"
                                     "}\n"
                                     "\n"
                                     "QPushButton:pressed {\n"
