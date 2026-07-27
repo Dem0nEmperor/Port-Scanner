@@ -5,6 +5,7 @@ import socket
 import time
 import struct
 import random
+import requests
 
 class IPScan:
     def __init__(self, host, portRange1, portRange2):
@@ -71,6 +72,8 @@ class IPScan:
 
             if response[:2] == struct.pack(">H", tid):
                 return True
+        except struct.error:
+            pass
         except socket.timeout:
             pass
 
@@ -79,11 +82,13 @@ class IPScan:
     def port_check(self, port):
         if self.stopped:
             return
+
         try:
-            with socket.create_connection((self.host, port), timeout=0.5) as sock:
+            with socket.create_connection((self.host, port), timeout=1) as sock:
 
                 active_result = self.active_check(sock)
                 if active_result != "None":
+                    sock.close()
                     return [port, active_result]
 
                 try:
@@ -95,17 +100,35 @@ class IPScan:
                     if response.startswith(b"HTTP"):
                         return [port, "HTTP"]
 
-                    return [port, "Unknown"]
+                   # return [port, "Unknown"]
 
                 except socket.timeout:
                     pass
         except Exception as e:
+            if port == 443:
+                print("Ошибка:" + str(e))
             return
-        with socket.create_connection((self.host, port), timeout=0.5) as sock:
-            if self.dns_check(sock):
-                return [port, "DNS"]
-            else:
-                return [port, "Unknown"]
+
+        try:
+            response = requests.get(
+                f"https://{self.host}:{port}",
+                timeout=2,
+                verify=False
+            )
+            return [port, "HTTPS"]
+        except requests.exceptions.SSLError:
+            pass
+        except requests.exceptions.RequestException:
+            pass
+
+        try:
+            with socket.create_connection((self.host, port), timeout=0.5) as sock:
+                if self.dns_check(sock):
+                    return [port, "DNS"]
+        except Exception as e:
+            pass
+
+        return [port, "Unknown"]
 
     def start_scan(self):
         for i in range(self.portRange1, self.portRange2 + 1):
