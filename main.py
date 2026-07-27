@@ -69,7 +69,9 @@ def scan_handler():
     ui.pushButton_3.setEnabled(True)
 
     ui.pushButton.setText("Start")
-    ui.setgreen()
+    w = BColorWorker(0)
+    w.id.connect(ui.set_color)
+    w.run()
 
     running = False
 
@@ -83,6 +85,17 @@ def scan_handler():
 def stop_button():
     global scan
     scan.stop()
+
+class BColorWorker(QObject):
+    id = Signal(int)
+
+    def __init__(self, color):
+        super().__init__()
+        self.color = color
+
+    def run(self):
+        self.id.emit(self.color)
+
 
 def start_button():
     global model
@@ -107,7 +120,9 @@ def start_button():
         running = True
 
         ui.pushButton.setText("Stop")
-        ui.setred()
+        w = BColorWorker(1)
+        w.id.connect(ui.set_color)
+        w.run()
 
         ui.pushButton_3.setEnabled(False)
 
