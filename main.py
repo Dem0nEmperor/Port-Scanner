@@ -47,55 +47,46 @@ def save():
             writer.writerows(ports)
             messagebox.showinfo("", "Export complete!")
     
+class ScanWorker(QThread):
+    colorChanged = Signal(int)
 
-def scan_handler():
-    global scan
-    global running
-    global ports
+    def run(self):
+        self.colorChanged.emit(1)
 
-    ports = []
+        global scan
+        global running
+        global ports
 
-    minPort = int(ui.lineEdit_2.text())
-    maxPort = int(ui.lineEdit_3.text())
+        ports = []
 
-    ui.progressBar.setMaximum(maxPort)
-    ui.progressBar.setMinimum(minPort)
+        minPort = int(ui.lineEdit_2.text())
+        maxPort = int(ui.lineEdit_3.text())
 
-    scan = IPScan(ui.lineEdit.text(), minPort, maxPort)
-    scan.start_scan()
-    scan.completed(model, ports)
-    
-    print(ports)
-    ui.pushButton_3.setEnabled(True)
+        ui.progressBar.setMaximum(maxPort)
+        ui.progressBar.setMinimum(minPort)
 
-    ui.pushButton.setText("Start")
-    w = BColorWorker(0)
-    w.id.connect(ui.set_color)
-    w.run()
+        scan = IPScan(ui.lineEdit.text(), minPort, maxPort)
+        scan.start_scan()
+        scan.completed(model, ports)
 
-    running = False
+        print(ports)
+        ui.pushButton_3.setEnabled(True)
 
-    time.sleep(1)
+        ui.pushButton.setText("Start")
+        self.colorChanged.emit(0)
 
-    scan.progress = minPort
-    time.sleep(0.1)
+        running = False
 
-    scan = None
+        time.sleep(1)
+
+        scan.progress = minPort
+        time.sleep(0.1)
+
+        scan = None
 
 def stop_button():
     global scan
     scan.stop()
-
-class BColorWorker(QObject):
-    id = Signal(int)
-
-    def __init__(self, color):
-        super().__init__()
-        self.color = color
-
-    def run(self):
-        self.id.emit(self.color)
-
 
 def start_button():
     global model
@@ -120,9 +111,6 @@ def start_button():
         running = True
 
         ui.pushButton.setText("Stop")
-        w = BColorWorker(1)
-        w.id.connect(ui.set_color)
-        w.run()
 
         ui.pushButton_3.setEnabled(False)
 
@@ -138,9 +126,11 @@ def start_button():
         ui.tableView.setColumnWidth(2, 115)
 
         timer.start()
-
-        tz = threading.Thread(target=scan_handler)
-        tz.start()
+        
+        global sw
+        sw = ScanWorker()
+        sw.colorChanged.connect(ui.set_color)
+        sw.start()
     else:
         messagebox.showerror("", "Error")
 
